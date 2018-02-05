@@ -2,11 +2,79 @@
 <html lang="en">
 <head>
   <title>Our simple HTTP server</title>
-  <link rel="stylesheet" type="text/css" href="/style.css">
+  <link rel="stylesheet" type="text/css" href="style.css">
   
   <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.34/browser.min.js"></script>
   <script type="text/babel">
+    const handleResponse = (xhr) => {
+        
+      const type = xhr.getResponseHeader('content-type');
+      const content = document.querySelector("#content");
+        
+        switch(xhr.status){
+              case 200:
+                content.innerHTML = `<h1>Success</h1>`;
+                  content.innerHTML += `<p>Message: This is a successful response</p>`;
+                  break;
+              case 400:
+                  content.innerHTML = `<h1>Bad Request</h1>`;
+                  content.innerHTML += `<p>Message: This request is missing valid query parameter set to true</p>`;
+                  break;
+              case 401:
+                  content.innerHTML = `<h1>Unauthorized</h1>`;
+                  content.innerHTML += `<p>Message: This request is missing loggedIn query parameter set to yes</p>`;
+                  break;
+                case 403:
+                  content.innerHTML = `<h1>Forbidden</h1>`;
+                  content.innerHTML += `<p>Message: You are not allowed to access the content requested</p>`;
+                  break;
+                case 500:
+                  content.innerHTML = `<h1>Internal Server Error </h1>`;
+                  content.innerHTML += `<p>Message: Internal Server Error, Something went wrong</p>`;
+                  break;
+                case 501:
+                  content.innerHTML = `<h1>Not Implemented </h1>`;
+                  content.innerHTML += `<p>Message: The data you are requesting has not been implemented yet</p>`;
+                  break;
+              default:
+                  content.innerHTML = `<h1>Not Found</h1>`;
+                  content.innerHTML += `<p>Message: The data you are requesting is not found</p>`;
+                  break;
+                  
+          }
+    if(type === 'application/json') {
+        const obj = JSON.parse(xhr.response);
+        console.dir(obj)
+      } else if (type === 'text/xml') {
+          console.dir(xhr.responseXML)
+      }
+      
+    };
+    
+    const sendAjax = (url, type) => {
 
+      const xhr = new XMLHttpRequest();
+
+      xhr.open('GET', url);
+      xhr.setRequestHeader ("Accept", type);
+      xhr.onload = () => handleResponse(xhr);
+      
+      xhr.send();
+        
+    };
+
+    const init = () => {
+        
+      const typeSelector = document.querySelector("#type");
+        const pageSelector = document.querySelector("#page")
+        const callButton = document.querySelector('#send')
+      
+      const sendFile = () => sendAjax(pageSelector.value, typeSelector.value);
+      
+        callButton.addEventListener('click', sendFile);
+    };
+
+    window.onload = init;
   </script>
 </head>
 <body>
